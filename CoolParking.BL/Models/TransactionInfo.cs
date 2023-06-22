@@ -3,17 +3,18 @@
 //       Other implementation details are up to you, they just have to meet the requirements of the homework.
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Transactions;
 
 public struct TransactionInfo
 {
-    private static bool isFirstTransaction = true;
+    
     public decimal Amount { get; set; }
     public DateTime Time { get; set; }
 
     public string VehicleId { get; set; }
-    public string filePath = @"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt";
+    
 
 
 
@@ -58,39 +59,73 @@ public struct TransactionInfo
     //        Console.WriteLine("Exception: " + ex.Message + ex.StackTrace + ex.InnerException);
     //    }
     //}
+    public override string ToString()
+    {
+        return $"{VehicleId}\t{Amount.ToString("F")}\t\t\t{Time}";
+    }
+
     public static void AddToTransactionLog(List<TransactionInfo> transactions)
     {
+        string filePath = @"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt";
 
         try
         {
-
-            if (isFirstTransaction)
+            if (!File.Exists(filePath))
             {
-
-                using (StreamWriter writer = new StreamWriter(@"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt"))
+                using (StreamWriter writer = new StreamWriter(filePath))
                 {
                     writer.WriteLine("VehicleId\tWritten Off Money\tTransaction Time");
                 }
-                isFirstTransaction = false;
             }
 
-            using (StreamWriter writer = new StreamWriter(@"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt", true))
+            using (StreamWriter writer = new StreamWriter(filePath, true))
             {
                 foreach (var transaction in transactions)
                 {
-                    writer.WriteLine(transaction.VehicleId + "\t" + transaction.Amount.ToString("F") + "\t\t\t" + transaction.Time);
+                    writer.WriteLine(transaction.ToString());
                     writer.WriteLine();
                 }
-
             }
         }
-        catch (FileNotFoundException)
+        catch (Exception ex)
         {
-            Console.WriteLine("There is no file with transactions\nContact administrator");
+            Console.WriteLine( ex.Message);
         }
-
-
     }
+    
+    //public static void AddToTransactionLog(List<TransactionInfo> transactions)
+    //{
+
+    //    try
+    //    {
+
+    //        if (isFirstTransaction)
+    //        {
+
+    //            using (StreamWriter writer = new StreamWriter(@"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt"))
+    //            {
+    //                writer.WriteLine("VehicleId\tWritten Off Money\tTransaction Time");
+    //            }
+    //            isFirstTransaction = false;
+    //        }
+
+    //        using (StreamWriter writer = new StreamWriter(@"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt", true))
+    //        {
+    //            foreach (var transaction in transactions)
+    //            {
+    //                writer.WriteLine(transaction.VehicleId + "\t" + transaction.Amount.ToString("F") + "\t\t\t" + transaction.Time);
+    //                writer.WriteLine();
+    //            }
+
+    //        }
+    //    }
+    //    catch (FileNotFoundException)
+    //    {
+    //        Console.WriteLine("There is no file with transactions\nContact administrator");
+    //    }
+
+
+    //}
     //public void AddToTransactionLog1(TransactionInfo[] transactionInfos)
     //{
 

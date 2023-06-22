@@ -29,24 +29,24 @@ public class Vehicle
         return $"{Id} {VehicleType} {Balance} ";
     }
 
-    public static string GenerateRandomRegistrationPlateNumber()
-    {
-        Random random = new Random();
-        const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const string digits = "0123456789";
+    //public static string GenerateRandomRegistrationPlateNumber()
+    //{
+    //    Random random = new Random();
+    //    const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    //    const string digits = "0123456789";
 
-        string registrationPlateNumber;
+    //    string registrationPlateNumber;
 
-        while (true) 
-        {
-            // Генеруємо випадкову комбінацію літер та цифр
-            string randomLetters = new string(Enumerable.Range(0, 2).Select(_ => letters[random.Next(letters.Length)]).ToArray());
-            string randomDigits = new string(Enumerable.Range(0, 4).Select(_ => digits[random.Next(digits.Length)]).ToArray());
+    //    while (true) 
+    //    {
+    //        // Генеруємо випадкову комбінацію літер та цифр
+    //        string randomLetters = new string(Enumerable.Range(0, 2).Select(_ => letters[random.Next(letters.Length)]).ToArray());
+    //        string randomDigits = new string(Enumerable.Range(0, 4).Select(_ => digits[random.Next(digits.Length)]).ToArray());
 
-            // Формуємо номер реєстраційної плитки
-            registrationPlateNumber = $"{randomLetters}-{randomDigits}-{randomLetters}";
-            return registrationPlateNumber;
-        }
+    //        // Формуємо номер реєстраційної плитки
+    //        registrationPlateNumber = $"{randomLetters}-{randomDigits}-{randomLetters}";
+    //        return registrationPlateNumber;
+    //    }
         
        
 
@@ -54,7 +54,7 @@ public class Vehicle
 
 
 
-    } 
+    //} 
 
 
 }

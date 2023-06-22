@@ -17,12 +17,17 @@ public class ParkingService: IParkingService
     private ITimerService _timerServiceFee;
     private ITimerService _timerServiceLog;
     private ITimerService _timerServiceWithdaraw;
+    private LogService _logService;
     private List<Vehicle> vehicles;
     private List<TransactionInfo> transactions;
+    private readonly string logPath = @"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt";
+
 
     public ParkingService()
     {
         parking = Parking.Instance;
+        _logService = new LogService(logPath);
+
         _timerServiceLog = new TimerService(Settings.LogWritePeriodInSeconds);
         _timerServiceFee = new TimerService(Settings.PaymentDeductionPeriodInSeconds);
         _timerServiceWithdaraw = new TimerService(60000);
@@ -51,7 +56,7 @@ public class ParkingService: IParkingService
     }
     private void Timer_ElapsedLog(object sender, ElapsedEventArgs e)
     {
-        parking.LogTransactions(parking.transactions);
+        _logService.AddToTransactionLog(transactions);
     }
 
     public void AddVehicle(Vehicle vehicle)
@@ -68,7 +73,10 @@ public class ParkingService: IParkingService
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        _timerServiceFee.Dispose();
+        _timerServiceWithdaraw.Dispose();   
+        _timerServiceLog.Dispose();
+        TransactionInfo.AddToTransactionLog(parking.transactions);
     }
 
     public decimal GetBalance()
@@ -100,12 +108,20 @@ public class ParkingService: IParkingService
 
     public string ReadFromLog()
     {
-        return parking.ReadFromLog();
+        //return parking.ReadFromLog();
+        return _logService.Read();
     }
 
     public void RemoveVehicle(string vehicleId)
     {
-        parking.RemoveVehicle(vehicleId);   
+        try
+        {
+            parking.RemoveVehicle(vehicleId);
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     public void TopUpVehicle(string vehicleId, decimal sum)

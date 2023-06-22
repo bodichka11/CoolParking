@@ -17,13 +17,15 @@ public class Parking
     
 
     
-    private static Parking instance;
-    private ITimerService _timerServiceFee;
-    private ITimerService _timerServiceLog;
+    private static readonly Lazy<Parking> lazyInstance = new Lazy<Parking>(() => new Parking());
+    public static Parking Instance { get { return lazyInstance.Value; } }
+
+    //private ITimerService _timerServiceFee;
+    //private ITimerService _timerServiceLog;
     private decimal balance;
     public List<Vehicle> vehicles;
     public List<TransactionInfo> transactions;
-    public List<TransactionInfo> LastMinuteTransactions { get; set; } = new List<TransactionInfo>();
+    //public List<TransactionInfo> LastMinuteTransactions { get; set; } = new List<TransactionInfo>();
     
 
 
@@ -66,17 +68,17 @@ public class Parking
 
 
 
-    public static Parking Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = new Parking();
-            }
-            return instance;
-        }
-    }
+    //public static Parking Instance
+    //{
+    //    get
+    //    {
+    //        if (instance is null)
+    //        {
+    //            instance = new Parking();
+    //        }
+    //        return instance;
+    //    }
+    //}
 
     public decimal Balance
     {
@@ -173,25 +175,25 @@ public class Parking
 
     public void ChargeFees(Vehicle vehicle)
     {
-        foreach (Vehicle vehicle1 in vehicles)
+        foreach (Vehicle veh in vehicles)
         {
-            decimal payment = Settings.GetTarrif(vehicle.VehicleType);
-            if (vehicle.Balance < payment)
+            decimal payment = Settings.Price[veh.VehicleType];
+            if (veh.Balance < payment)
             {
-                decimal penalty = payment - vehicle.Balance;
+                decimal penalty = payment - veh.Balance;
                 payment += penalty * Settings.PenaltyCoefficient;
             }
 
             
             
-            vehicle.Balance -= payment;
+            veh.Balance -= payment;
             balance += payment;
 
             
 
-            var transaction = new TransactionInfo(payment, vehicle.Id);
+            var transaction = new TransactionInfo(payment, veh.Id);
             transactions.Add(transaction);
-            LastMinuteTransactions.Add(transaction);
+            //LastMinuteTransactions.Add(transaction);
         }
     }
 
@@ -238,8 +240,8 @@ public class Parking
     //}
     public void LogTransactions(object stateInfo)
     {
-        TransactionInfo.AddToTransactionLog(LastMinuteTransactions);
-        LastMinuteTransactions.Clear();
+        TransactionInfo.AddToTransactionLog(transactions);
+        transactions.Clear();
     }
 
 
@@ -266,16 +268,16 @@ public class Parking
 
 
     }
-    
+
 
     public string ReadFromLog()
     {
         Console.WriteLine(File.ReadAllText(@"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt"));
         return File.ReadAllText(@"C:\Users\rosty\source\repos\bsa-dotnet-hw2-template\CoolParking\CoolParking.BL\Models\Transactions.log.txt");
-        
+
 
     }
-   
+
 
     public void RemoveVehicle(string vehicleId)
     {
@@ -310,17 +312,12 @@ public class Parking
     {
         List<TransactionInfo> lastTransactions = new List<TransactionInfo>();
         Console.WriteLine("VehicleId\tWritten Off Money\tTransaction Time");
-        foreach (var transaction in Parking.Instance.LastMinuteTransactions)
+        foreach (var transaction in Parking.Instance.transactions)
         {
-            TransactionInfo info = new TransactionInfo
-            {
-                VehicleId = transaction.VehicleId,
-                Amount = transaction.Amount,
-                Time = transaction.Time
-            };
+            
 
-            lastTransactions.Add(info);
-            Console.WriteLine(info.VehicleId +  "\t\t" + info.Amount.ToString() +  "\t\t\t" + info.Time);
+            lastTransactions.Add(transaction);
+            Console.WriteLine(transaction.VehicleId +  "\t\t" + transaction.Amount.ToString() +  "\t\t\t" + transaction.Time);
         }
         
         return lastTransactions.ToArray();
@@ -369,83 +366,7 @@ public class Parking
     //    _timerService.Dispose();
     //}
 
-    public void ShowParkingMenu()
-    {
-
-        string? userSelection;
-
-        do
-        {
-            Console.ResetColor();
-            //Console.Clear();
-            Console.WriteLine("************************");
-            Console.WriteLine("* CoolParking *");
-            Console.WriteLine("************************");
-
-
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("What do you want to do?");
-            Console.ResetColor();
-
-            Console.WriteLine("1: Display the current Parking balance on the screen");
-            Console.WriteLine("2: Display the amount of money earned for the current period");
-            Console.WriteLine("3: Display the number of free parking spaces (free X of Y) ");
-            Console.WriteLine("4: Display all Parking Transactions for the current period (before logging).");
-            Console.WriteLine("5: Display the history of Transactions on the screen (after reading the data from the Transactions.log file).");
-            Console.WriteLine("6: Display the list of Tr. means located in the Parking lot. ");
-            Console.WriteLine("7: Park the Vehicle.");
-            Console.WriteLine("8: Pick up the Vehicle from the Parking lot.");
-            Console.WriteLine("9: Top up the balance of a particular Tr. tool");
-            Console.WriteLine("0: Exit");
-            Console.Write("Your selection: ");
-
-            userSelection = Console.ReadLine();
-
-            switch (userSelection)
-            {
-                case "1":
-                    GetBalance();
-                    break;
-
-                case "2":
-                    
-
-                    break;
-
-                case "3":
-                    GetFreePlaces();
-                    break;
-
-                case "4":
-                    GetLastParkingTransactions();
-                   
-                    break;
-                case "5":
-                    ReadFromLog();
-
-                    break;
-                case "6":
-                    GetVehicles();
-                    break;
-                case "7":
-                    ShowAddVehicleMenu();
-                    break;
-                case "8":
-                    ShowRemoveVehicleMenu();
-                    break;
-                case "9":
-                    ShowTopUpVehicleMenu();
-                    break;
-
-
-                default:
-                    Console.WriteLine("Invalid selection. Please try again.");
-                    break;
-            }
-        }
-        while (userSelection != "0");
-    }
+    
 
 
 
